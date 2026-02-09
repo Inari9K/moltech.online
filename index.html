@@ -1,16 +1,431 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Moltech Coaching — a learning and coaching platform with an AI assistant for guided lessons, note-taking, and Q&A." />
   <title>Moltech Coaching</title>
+
+  <style>
+    :root{
+      --bg: #0b0f17;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --border: rgba(255,255,255,.14);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --r: 18px;
+      --accent: #7c5cff;
+      --accent2: #2fe3b7;
+      --warn: #ffcc66;
+      --link: rgba(255,255,255,.92);
+      --max: 980px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 10%, rgba(124,92,255,.35), transparent 55%),
+        radial-gradient(800px 500px at 90% 30%, rgba(47,227,183,.22), transparent 60%),
+        radial-gradient(700px 500px at 40% 90%, rgba(255,204,102,.16), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+    }
+
+    a{ color: var(--link); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 18px 60px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .logo{
+      width:44px; height:44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(47,227,183,.85));
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.20);
+      flex: 0 0 auto;
+      position: relative;
+      overflow:hidden;
+    }
+    .logo:after{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 55%);
+      transform: rotate(20deg);
+    }
+    .brand h1{
+      margin:0;
+      font-size: 16px;
+      letter-spacing:.2px;
+      line-height:1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size: 12px;
+      color: var(--muted2);
+    }
+
+    .pill{
+      font-size: 12px;
+      color: rgba(0,0,0,.85);
+      background: rgba(255,255,255,.90);
+      border-radius: 999px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.30);
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .pill code{ font-family: var(--mono); font-size: 11px; }
+
+    .hero{
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel), rgba(255,255,255,.04));
+      border-radius: var(--r);
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+    .hero h2{
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: .2px;
+      line-height: 1.15;
+    }
+    .hero .sub{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 75ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .hero h2{ font-size: 24px; }
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      border-radius: var(--r);
+      padding: 18px;
+    }
+    .card h3{
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: .2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.78);
+    }
+    .list{
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    .note{
+      margin: 12px 0 0;
+      color: var(--muted2);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .note strong{ color: rgba(255,255,255,.85); font-weight: 600; }
+
+    .actions{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      font-size: 14px;
+      cursor:pointer;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.26);
+      text-decoration:none;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(124,92,255,.65));
+      border-color: rgba(255,255,255,.22);
+    }
+    .btn.primary:hover{
+      background: linear-gradient(135deg, rgba(124,92,255,1), rgba(124,92,255,.72));
+    }
+    .btn.good{
+      background: linear-gradient(135deg, rgba(47,227,183,.85), rgba(47,227,183,.45));
+      border-color: rgba(255,255,255,.18);
+      color: rgba(0,0,0,.92);
+    }
+    .btn.good:hover{ filter: brightness(1.05); }
+    .btn.small{
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .icon{
+      width: 18px; height:18px;
+      display:inline-block;
+      opacity: .95;
+    }
+
+    .footer{
+      margin-top: 18px;
+      color: var(--muted2);
+      font-size: 12px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items:center;
+      justify-content: space-between;
+    }
+    .footer .left, .footer .right{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items:center;
+    }
+    .mono{ font-family: var(--mono); }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+    }
+
+    /* Modal */
+    .modalBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(720px, 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(15,18,30,.92);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 80px rgba(0,0,0,.55);
+      padding: 18px;
+    }
+    .modal h4{
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+    .modal p{
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    .modal .row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content:flex-end;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Moltech E-sports Coaching</h1>
-  <p>AI-assisted coaching and learning platform for Smash Ultimate.</p>
-  <p>This project is currently in development.</p>
-  <p>
-    Main site:
-    <a href="https://moltech.carrd.co">moltech.carrd.co</a>
-  </p>
-  <p>Contact: admin@moltech.online</p>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Moltech Coaching</h1>
+          <p>AI-assisted coaching + learning support</p>
+        </div>
+      </div>
+      <div class="pill" title="Contact email">
+        <span>📩</span>
+        <code>admin@moltech.online</code>
+      </div>
+    </div>
+
+    <main class="hero">
+      <h2>Coaching for Smash Ultimate, with an AI assistant built for learning.</h2>
+      <p class="sub">
+        Moltech is an early-stage coaching and learning platform. The AI assistant supports guided lessons,
+        structured note-taking, question answering, and basic customer support so students can get unstuck fast.
+      </p>
+
+      <div class="actions">
+        <a class="btn primary" href="https://moltech.carrd.co" target="_blank" rel="noreferrer">
+          <span class="icon">🧠</span> Open Main Site (Carrd)
+        </a>
+
+        <button class="btn good" id="assistantBtn" type="button">
+          <span class="icon">🤖</span> AI Assistant (WIP)
+        </button>
+
+        <button class="btn" id="apptBtn" type="button">
+          <span class="icon">📅</span> Appointments (WIP)
+        </button>
+
+        <a class="btn small" href="mailto:admin@moltech.online?subject=Moltech%20Coaching%20Inquiry">
+          <span class="icon">✉️</span> Email
+        </a>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <h3>What the assistant can do</h3>
+          <ul class="list">
+            <li>Walk you through lessons step by step</li>
+            <li>Help you take clear, structured notes</li>
+            <li>Answer questions when something doesn’t click</li>
+            <li>Point you to the right material based on your goals</li>
+            <li>Assist with scheduling and general site navigation</li>
+          </ul>
+          <p class="note">
+            <strong>Note:</strong> This is a prototype in progress. The goal is to iterate gradually based on real user feedback.
+          </p>
+        </section>
+
+        <aside class="card">
+          <h3>Status</h3>
+          <div class="tag">🧪 Prototyping & testing</div>
+          <div class="tag">🎮 Smash Ultimate coaching</div>
+          <div class="tag">🧾 Guided note-taking</div>
+          <div class="tag">🛟 Student support & Q&amp;A</div>
+          <p class="note">
+            Want updates or early access? Email <span class="mono">admin@moltech.online</span>.
+          </p>
+        </aside>
+      </div>
+
+      <div class="footer">
+        <div class="left">
+          <span class="tag">Domain: <span class="mono">moltech.online</span></span>
+          <span class="tag">Contact: <span class="mono">admin@moltech.online</span></span>
+        </div>
+        <div class="right">
+          <a href="https://moltech.carrd.co" target="_blank" rel="noreferrer">Carrd site</a>
+          <a href="mailto:admin@moltech.online?subject=Moltech%20Coaching%20Inquiry">Email</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Simple modals so buttons aren't dead -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-label="Modal">
+    <div class="modal">
+      <h4 id="modalTitle">Title</h4>
+      <p id="modalBody">Body</p>
+      <div class="row">
+        <button class="btn" id="closeModal" type="button">Close</button>
+        <a class="btn primary" id="modalLink" href="#" target="_blank" rel="noreferrer">Open</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modalBack = document.getElementById('modalBack');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalLink = document.getElementById('modalLink');
+    const closeModal = document.getElementById('closeModal');
+
+    function openModal(title, body, linkHref, linkText){
+      modalTitle.textContent = title;
+      modalBody.textContent = body;
+      modalLink.href = linkHref;
+      modalLink.textContent = linkText || "Open";
+      modalBack.style.display = "flex";
+    }
+
+    function close(){
+      modalBack.style.display = "none";
+    }
+
+    document.getElementById('assistantBtn').addEventListener('click', () => {
+      openModal(
+        "AI Assistant (Work in Progress)",
+        "The assistant is currently in development. For now, the main landing page lives on Carrd while features are being built and tested.",
+        "https://moltech.carrd.co",
+        "Open Main Site"
+      );
+    });
+
+    document.getElementById('apptBtn').addEventListener('click', () => {
+      openModal(
+        "Appointments (Work in Progress)",
+        "Scheduling is being set up. For now, send an email with your availability and what you want to work on.",
+        "mailto:admin@moltech.online?subject=Appointment%20Request&body=Hi%20Moltech,%0A%0AI%27d%20like%20to%20book%20a%20session.%20Here%20are%20a%20few%20times%20that%20work%20for%20me:%0A-%20%0A-%20%0A%0AWhat%20I%20want%20to%20work%20on:%0A",
+        "Email to Book"
+      );
+    });
+
+    modalBack.addEventListener('click', (e) => {
+      if (e.target === modalBack) close();
+    });
+
+    closeModal.addEventListener('click', close);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  </script>
 </body>
 </html>
